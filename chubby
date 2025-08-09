@@ -5,7 +5,7 @@ function print_help() {
 }
 
 switch_D=""
-switch_N=""
+switch_n=""
 switch_O=""
 switch_r=""
 
@@ -44,8 +44,8 @@ function parse_arg() {
       # handle switches
       if   [[ "$char" == "D" ]]; then
         switch_D="-D"
-      elif [[ "$char" == "N" ]]; then
-        switch_N="-N"
+      elif [[ "$char" == "n" ]]; then
+        switch_n="-n"
       elif [[ "$char" == "O" ]]; then
         switch_O="-O"
       elif [[ "$char" == "r" ]]; then
@@ -101,11 +101,13 @@ function find_file() {
 
 
 parse_args $@
-find_file
+if [[ "$switch_n" == "" ]]; then
+  find_file
+fi
 
 echo 
 echo "switch_D: $switch_D"
-echo "switch_N: $switch_N"
+echo "switch_n: $switch_n"
 echo "switch_O: $switch_O"
 echo "switch_r: $switch_r"
 echo "port:     $port"
