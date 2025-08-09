@@ -25,7 +25,6 @@ function parse_arg() {
 
   local arg=${1}
   local narg=${2}
-  echo $narg: $arg
 
   if [ $port_waiting -ne $narg ]; then
     port_waiting=-1
@@ -90,16 +89,13 @@ function parse_args() {
 
 function find_file() {
   local dir=$(pwd)
-  echo $dir
   while [ ! -e "$dir/$file" ]; do
     dir=$(realpath "$dir/../")
-    echo $dir
     if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
       echo "Could not find file $file"
       exit 1
     fi
   done
-  echo "file: $dir/$file"
   parse_args $(cat "$dir/$file")
 }
 
