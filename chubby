@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 function print_help() {
-  echo "usage: chubby [-DNOr] [-p port] [-f file] [src -> dest] ..."
+  echo "usage: chubby [-DnOr] [-p port] [-f file] [src > dest] ..."
 }
+
+if [[ "$1" == "-h" ]] || [ "$1" == "--help" ]; then
+  print_help
+  exit 0
+fi
 
 switch_D=""
 switch_n=""
@@ -93,6 +98,7 @@ function find_file() {
     dir=$(realpath "$dir/../")
     if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
       echo "Could not find file $file"
+      print_help
       exit 1
     fi
   done
