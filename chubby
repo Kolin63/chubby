@@ -1,8 +1,34 @@
 #!/usr/bin/env bash
 
 function print_help() {
-  echo "usage: chubby [-t timer] [-O legacy_scp] [-r recursive]"
-  echo "              [-B batch_mode] [-p port] [-D pre_delete] src dest"
+echo "chubby [-t timer] [-O legacy_scp] [-r recursive] [-B batch_mode] [-p port]"
+echo "       [-D pre_delete] src dest"
+echo ""
+echo "src and dest are the source file(s) and destination file or directory. Either"
+echo "can be via ssh (john@example.com:/path/to/file/or/directory) or locally"
+echo "(/path/to/file/or/directory). "
+echo ""
+echo "-t: A positive integral value, representing how many seconds the program waits"
+echo "    before updating the destination again. Set to 0 to manually continue in"
+echo "    between each update. Defaults to 0."
+echo ""
+echo "-O: Use the legacy SCP protocol for file transfers instead of the SFTP"
+echo "    protocol. Forcing the use of the SCP protocol may be necessary for servers"
+echo "    that do not implement SFTP, for backwards-compatibility for particular"
+echo "    filename wildcard patterns and for expanding paths with a ‘~’ prefix for"
+echo "    older SFTP servers."
+echo ""
+echo "-r: Recursively copy entire directories."
+echo ""
+echo "-B: Selects batch mode (prevents asking for passwords or passphrases)."
+echo ""
+echo "-p: Specifies the port to connect to on the remote host. May be written with a"
+echo "    lowercase or capital P."
+echo ""
+echo "-D: Enables Pre-Delete, which first deletes the file or directory at the"
+echo "    destination before copying the source. Note that if you are recursively"
+echo "    copying a directory, this can be potentially destructive and delete files"
+echo "    that were not intended to be deleted."
 }
 
 if [ $# -lt 2 ]; then
