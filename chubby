@@ -1,149 +1,118 @@
 #!/usr/bin/env bash
 
 function print_help() {
-echo "chubby [-t timer] [-O legacy_scp] [-r recursive] [-B batch_mode] [-p port]"
-echo "       [-D pre_delete] src dest"
-echo ""
-echo "src and dest are the source file(s) and destination file or directory. Either"
-echo "can be via ssh (john@example.com:/path/to/file/or/directory) or locally"
-echo "(/path/to/file/or/directory). "
-echo ""
-echo "-t: A positive integral value, representing how many seconds the program waits"
-echo "    before updating the destination again. Set to 0 to manually continue in"
-echo "    between each update. Defaults to 0."
-echo ""
-echo "-O: Use the legacy SCP protocol for file transfers instead of the SFTP"
-echo "    protocol. Forcing the use of the SCP protocol may be necessary for servers"
-echo "    that do not implement SFTP, for backwards-compatibility for particular"
-echo "    filename wildcard patterns and for expanding paths with a ‘~’ prefix for"
-echo "    older SFTP servers."
-echo ""
-echo "-r: Recursively copy entire directories."
-echo ""
-echo "-B: Selects batch mode (prevents asking for passwords or passphrases)."
-echo ""
-echo "-p: Specifies the port to connect to on the remote host. May be written with a"
-echo "    lowercase or capital P."
-echo ""
-echo "-D: Enables Pre-Delete, which first deletes the file or directory at the"
-echo "    destination before copying the source. Note that if you are recursively"
-echo "    copying a directory, this can be potentially destructive and delete files"
-echo "    that were not intended to be deleted."
+  echo "usage: chubby [-DNOr] [-p port] [-f file] [src -> dest] ..."
 }
 
-if [ $# -lt 2 ]; then
-  print_help
-  exit 0
-fi
+switch_D=""
+switch_N=""
+switch_O=""
+switch_r=""
 
-timer=0
-legacy=""
-recursive=""
-batch=""
-port=22
-predelete=0
+port="22"
+port_waiting=-1
 
-src="${@: -2:1}"
-dest="${@: -1}"
+file=".chubby"
+file_waiting=-1
 
-for (( i=1; i<=$#; i++ ));  do
-  arg=${@: $i:1}
-  if [[ "$arg" == "-t" ]]; then
-    timer=${@: $(($i+1)):1}
-  elif [[ "$arg" == "-O" ]]; then
-    legacy="-O"
-  elif [[ "$arg" == "-r" ]]; then
-    recursive="-r"
-  elif [[ "$arg" == "-B" ]]; then
-    batch="-B"
-  elif [[ "$arg" == "-p" ]] || [[ "$arg" == "-P" ]]; then
-    port=${@: $(($i+1)):1}
-  elif [[ "$arg" == "-D" ]]; then
-    predelete=1
+src=""
+potential_src=""
+dest=""
+dest_waiting=-1
+
+# params: single argument, original argument number
+function parse_arg() {
+
+  local arg=${1}
+  local narg=${2}
+  echo $narg: $arg
+
+  if [ $port_waiting -ne $narg ]; then
+    port_waiting=-1
   fi
-done
-
-# params: value, name
-function check_int() {
-  if [[ $1 =~ ^[0-9.]+$ ]]; then
-    return
-  else
-    echo chubby: bad $2 \"$1\"
-    print_help
-    exit 1
+  if [ $file_waiting -ne $narg ]; then
+    file_waiting=-1
   fi
+  if [ $dest_waiting -ne $narg ]; then
+    dest_waiting=-1
+  fi
+
+  if [[ ${arg:0:1} = "-" ]]; then
+    for (( chari=2; chari<=${#arg}; chari++ )); do
+
+      char=${arg:$((chari-1)):1}
+
+      # handle switches
+      if   [[ "$char" == "D" ]]; then
+        switch_D="-D"
+      elif [[ "$char" == "N" ]]; then
+        switch_N="-N"
+      elif [[ "$char" == "O" ]]; then
+        switch_O="-O"
+      elif [[ "$char" == "r" ]]; then
+        switch_r="-r"
+
+        # handle arguments
+      elif [[ "$char" == "p" ]]; then
+        port_waiting=$((i+1))
+      elif [[ "$char" == "f" ]]; then
+        file_waiting=$((i+1))
+
+      fi
+
+    done
+
+    # handle update operator
+  elif [[ "$arg" == ">" ]]; then
+    dest_waiting=$((i+1))
+    src=$potential_src
+
+    # handle argument values
+  elif [ $port_waiting -eq $narg ]; then
+    port=$arg
+  elif [ $file_waiting -eq $narg ]; then
+    file=$arg
+  elif [ $dest_waiting -eq $narg ]; then
+    dest=$arg
+
+  fi
+
+  potential_src=$arg
 }
 
-check_int $timer timer
-check_int $port port
+# params: arguments
+function parse_args() {
+  for (( i=1; i<=$#; i++ )); do
+    local arg=${!i}
+    parse_arg $arg $i
+  done
+}
 
-if [ $predelete -eq 1 ] && [ $recursive == "-r" ]; then
-  echo "WARNING: PreDelete and Recursive are enabled, which is potentially"
-  echo "         destructive. This means that all folders and directories will"
-  echo "         be deleted before the copy is made. Before continuing, double"
-  echo "         check that the destination path is correct to avoid losing"
-  echo "         data.
-
-  while [[ "$answer" != "Y" ]] && [[ "$answer" != "y" ]]; do
-    read -p "Continue and risk losing data? (y/N): " answer
-    if [[ "$answer" == "n" ]] || [[ "$answer" == "N" ]] || [[ "$answer" == "" ]]; then
-      exit 0
+function find_file() {
+  local dir=$(pwd)
+  echo $dir
+  while [ ! -e "$dir/$file" ]; do
+    dir=$(realpath "$dir/../")
+    echo $dir
+    if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
+      echo "Could not find file $file"
+      exit 1
     fi
   done
-  echo
-fi
+  echo "file: $dir/$file"
+  parse_args $(cat "$dir/$file")
+}
 
-echo Timer: $timer
-echo Port: $port
-echo Source: $src
-echo Destination: $dest
-echo
-echo Starting Chubby
 
-while true; do
+parse_args $@
+find_file
 
-  if [ $predelete -eq 1 ]; then
-    if [[ "$dest" == *:* ]]; then
-      host="${dest%%:*}"
-      path="${dest#*:}"
-      ssh $host -p $port rm $path $recursive
-    else
-      rm $dest $recursive
-    fi
-  fi
-
-  command="scp -P $port $legacy $recursive $batch $src $dest"
-  $command > /dev/null
-  if [ $? -eq 0 ]; then
-    echo $(date +%T): Update Complete
-
-  elif [ "$legacy" == "" ]; then
-    echo
-    echo Enabling legacy scp to attempt to resolve the issue
-    while [[ "$answer" != "Y" ]] && [[ "$answer" != "y" ]]; do
-      read -p "Continue and enable legacy scp? (Y/n): " answer
-      if [[ "$answer" == "n" ]] || [[ "$answer" == "N" ]]; then
-        exit 0
-      elif [[ "$answer" == "" ]]; then
-        break
-      fi
-    done
-    legacy="-O"
-    echo
-  else
-    exit $?
-  fi
-
-  if [ $timer -gt 0 ]; then
-    sleep $timer
-  else
-    while [[ "$answer" != "Y" ]] && [[ "$answer" != "y" ]]; do
-      read -p "Continue? (Y/n): " answer
-      if [[ "$answer" == "n" ]] || [[ "$answer" == "N" ]]; then
-        exit 0
-      elif [[ "$answer" == "" ]]; then
-        break
-      fi
-    done
-  fi
-done
+echo 
+echo "switch_D: $switch_D"
+echo "switch_N: $switch_N"
+echo "switch_O: $switch_O"
+echo "switch_r: $switch_r"
+echo "port:     $port"
+echo "file:     $file"
+echo "src:      $src"
+echo "dest:     $dest"
