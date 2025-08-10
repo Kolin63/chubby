@@ -8,7 +8,7 @@
 
 function print_help() {
   echo
-  echo "usage: chubby [-Dn] [-f file] scp_arguments"
+  echo "usage: chubby [-n] [-f file] scp_arguments"
   echo ""
   echo "Work Locally, Edit Remotely!" 
   echo ""
@@ -30,8 +30,6 @@ function print_help() {
   echo "Since Chubby is an scp wrapper, any arguments not listed below will be"
   echo "passed to scp. Therefore, any and all scp arguments are valid for"
   echo "Chubby to use."
-  echo ""
-  echo "-D      Deletes the file or directory before performing the copy."
   echo ""
   echo "-n      Don't read from a file."
   echo ""
@@ -58,7 +56,6 @@ file_path=""
 file_waiting=-1
 file_contents=""
 
-switch_D=""
 switch_n=""
 
 scp_args=""
@@ -79,9 +76,7 @@ function parse_arg() {
       char=${arg:$chari:1}
 
       # handle switches
-      if   [[ "$char" == "D" ]]; then
-        switch_D="-D"
-      elif [[ "$char" == "n" ]]; then
+      if [[ "$char" == "n" ]]; then
         switch_n="-n"
 
       # handle arguments
@@ -110,7 +105,6 @@ function parse_arg() {
 # params: arguments
 function execute_line() {
 
-  switch_D=""
   switch_n=""
   scp_args=""
 
