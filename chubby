@@ -7,7 +7,7 @@
 ###############################################################################
 
 function print_help() {
-  echo "usage: chubby [-Dn] [-f file] [-e command]"
+  echo "usage: chubby [-Dn] [-f file]"
   echo ""
   echo "-D      Deletes the file or directory before performing the copy."
   echo ""
@@ -18,10 +18,6 @@ function print_help() {
   echo "        search for this file starts in the current working directory,"
   echo "        and continues to check in the parent directory until it"
   echo "        reaches ~ or /."
-  echo ""
-  echo "-e command"
-  echo "        Executes a chubby command. This command is executed before the"
-  echo "        file. See Command Syntax below for more information."
 }
 
 if [[ "$1" == "-h" ]] || [ "$1" == "--help" ]; then
@@ -41,8 +37,6 @@ switch_n=""
 file=".chubby"
 file_waiting=-1
 file_contents=""
-command=""
-command_waiting=-1
 
 scp_args=""
 
@@ -54,9 +48,6 @@ function parse_arg() {
 
   if [ $file_waiting -ne $narg ]; then
     file_waiting=-1
-  fi
-  if [ $command_waiting -ne $narg ]; then
-    command_waiting=-1
   fi
 
   if [[ ${arg:0:1} = "-" ]]; then
@@ -73,8 +64,6 @@ function parse_arg() {
       # handle arguments
       elif [[ "$char" == "f" ]]; then
         file_waiting=$((i+1))
-      elif [[ "$char" == "e" ]]; then
-        command_waiting=$((i+1))
 
       # handle scp arguments
       else
@@ -87,8 +76,6 @@ function parse_arg() {
   # handle argument values
   elif [ $file_waiting -eq $narg ]; then
     file=$arg
-  elif [ $command_waiting -eq $narg ]; then
-    command=$arg
 
   # handle scp arguments
   else
