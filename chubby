@@ -54,9 +54,9 @@ function parse_arg() {
   fi
 
   if [[ ${arg:0:1} = "-" ]]; then
-    for (( chari=2; chari<=${#arg}; chari++ )); do
+    for (( chari=1; chari<${#arg}; chari++ )); do
 
-      char=${arg:$((chari-1)):1}
+      char=${arg:$chari:1}
 
       # handle switches
       if   [[ "$char" == "D" ]]; then
