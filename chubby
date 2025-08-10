@@ -114,6 +114,7 @@ function find_file() {
       exit 1
     fi
   done
+  echo "Using file: $dir/$file"
   parse_args $(cat "$dir/$file")
 }
 
@@ -123,7 +124,6 @@ if [[ "$switch_n" == "" ]]; then
   find_file
 fi
 
-echo 
 echo "switch_D: $switch_D"
 echo "switch_n: $switch_n"
 echo "switch_O: $switch_O"
@@ -132,3 +132,46 @@ echo "port:     $port"
 echo "file:     $file"
 echo "src:      $src"
 echo "dest:     $dest"
+
+###############################################################################
+#
+# LOCATION PARSING
+#
+###############################################################################
+
+src_host=""
+src_path=""
+src_port=$port
+
+dest_host=""
+dest_path=""
+dest_port=$port
+
+# param: location (src or dest)
+function parse_location() {
+
+  local colons=0
+  local backslash=0
+
+  for (( chari=0; chari<${#1}; chari++ )); do
+
+    local char=${1:$chari:1}
+
+    if [[ "$char" == ":" ]] && [ $backslash -eq 0 ]; then
+      colons=$(($colons+1))
+    fi
+
+    echo "$char $colons"
+
+    if [[ "$char" == "\\" ]] && [ $backslash -eq 0 ]; then
+      backslash=1
+    else
+      backslash=0
+    fi
+
+  done
+}
+
+parse_location $src
+echo
+parse_location $dest
