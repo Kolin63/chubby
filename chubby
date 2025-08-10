@@ -7,7 +7,21 @@
 ###############################################################################
 
 function print_help() {
-  echo "usage: chubby [-DnOr] [-p port] [-f file] [src > dest] ..."
+  echo "usage: chubby [-Dn] [-f file] [-e command]"
+  echo ""
+  echo "-D      Deletes the file or directory before performing the copy."
+  echo ""
+  echo "-n      Don't read from a file. To perform an operation, use -e"
+  echo ""
+  echo "-f file"
+  echo "        The name of the file to read from. Defaults to '.chubby'. The"
+  echo "        search for this file starts in the current working directory,"
+  echo "        and continues to check in the parent directory until it"
+  echo "        reaches ~ or /."
+  echo ""
+  echo "-e command"
+  echo "        Executes a chubby command. This command is executed before the"
+  echo "        file. See Command Syntax below for more information."
 }
 
 if [[ "$1" == "-h" ]] || [ "$1" == "--help" ]; then
@@ -23,19 +37,13 @@ fi
 
 switch_D=""
 switch_n=""
-switch_O=""
-switch_r=""
-
-port="22"
-port_waiting=-1
 
 file=".chubby"
 file_waiting=-1
+command=""
+command_waiting=-1
 
-src=""
-potential_src=""
-dest=""
-dest_waiting=-1
+scp_args=""
 
 # params: single argument, original argument number
 function parse_arg() {
@@ -43,14 +51,11 @@ function parse_arg() {
   local arg=${1}
   local narg=${2}
 
-  if [ $port_waiting -ne $narg ]; then
-    port_waiting=-1
-  fi
   if [ $file_waiting -ne $narg ]; then
     file_waiting=-1
   fi
-  if [ $dest_waiting -ne $narg ]; then
-    dest_waiting=-1
+  if [ $command_waiting -ne $narg ]; then
+    command_waiting=-1
   fi
 
   if [[ ${arg:0:1} = "-" ]]; then
@@ -63,37 +68,32 @@ function parse_arg() {
         switch_D="-D"
       elif [[ "$char" == "n" ]]; then
         switch_n="-n"
-      elif [[ "$char" == "O" ]]; then
-        switch_O="-O"
-      elif [[ "$char" == "r" ]]; then
-        switch_r="-r"
 
-        # handle arguments
-      elif [[ "$char" == "p" ]]; then
-        port_waiting=$((i+1))
+      # handle arguments
       elif [[ "$char" == "f" ]]; then
         file_waiting=$((i+1))
+      elif [[ "$char" == "e" ]]; then
+        command_waiting=$((i+1))
+
+      # handle scp arguments
+      else
+        scp_args="$scp_args-$char "
 
       fi
 
     done
 
-  # handle update operator
-  elif [[ "$arg" == "=" ]]; then
-    dest_waiting=$((i+1))
-    src=$potential_src
-
-    # handle argument values
-  elif [ $port_waiting -eq $narg ]; then
-    port=$arg
+  # handle argument values
   elif [ $file_waiting -eq $narg ]; then
     file=$arg
-  elif [ $dest_waiting -eq $narg ]; then
-    dest=$arg
+  elif [ $command_waiting -eq $narg ]; then
+    command=$arg
+
+  # handle scp arguments
+  else
+    scp_args="$scp_args$arg "
 
   fi
-
-  potential_src=$arg
 }
 
 # params: arguments
@@ -126,52 +126,10 @@ fi
 
 echo "switch_D: $switch_D"
 echo "switch_n: $switch_n"
-echo "switch_O: $switch_O"
-echo "switch_r: $switch_r"
-echo "port:     $port"
 echo "file:     $file"
-echo "src:      $src"
-echo "dest:     $dest"
+echo "command:  $command"
+echo "scp_args: $scp_args"
 
-###############################################################################
-#
-# LOCATION PARSING
-#
-###############################################################################
-
-src_host=""
-src_path=""
-src_port=$port
-
-dest_host=""
-dest_path=""
-dest_port=$port
-
-# param: location (src or dest)
-function parse_location() {
-
-  local colons=0
-  local backslash=0
-
-  for (( chari=0; chari<${#1}; chari++ )); do
-
-    local char=${1:$chari:1}
-
-    if [[ "$char" == ":" ]] && [ $backslash -eq 0 ]; then
-      colons=$(($colons+1))
-    fi
-
-    echo "$char $colons"
-
-    if [[ "$char" == "\\" ]] && [ $backslash -eq 0 ]; then
-      backslash=1
-    else
-      backslash=0
-    fi
-
-  done
-}
-
-parse_location $src
-echo
-parse_location $dest
+if [[ ! $scp_args == "" ]]; then
+  scp $scp_args
+fi
