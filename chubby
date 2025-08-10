@@ -106,7 +106,7 @@ function parse_args() {
 
 function find_file() {
   local dir=$(pwd)
-  while [ ! -e "$dir/$file" ]; do
+  while [ ! -e "$dir/$file" ] && [ ! -e $file ]; do
     dir=$(realpath "$dir/../")
     if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
       echo "Could not find file $file"
@@ -114,8 +114,12 @@ function find_file() {
       exit 1
     fi
   done
-  echo "Using file: $dir/$file"
-  parse_args $(cat "$dir/$file")
+
+  local ffile=$(realpath $file)
+  if [ ! -e $ffile ]; then
+    ffile=$(realpath "$dir/$file")
+  fi
+  parse_args $(cat "$ffile")
 }
 
 
