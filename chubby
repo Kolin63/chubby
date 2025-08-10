@@ -53,13 +53,13 @@ fi
 #
 ###############################################################################
 
-switch_D=""
-switch_n=""
-
 file=".chubby"
 file_path=""
 file_waiting=-1
 file_contents=""
+
+switch_D=""
+switch_n=""
 
 scp_args=""
 
@@ -109,6 +109,10 @@ function parse_arg() {
 
 # params: arguments
 function execute_line() {
+
+  switch_D=""
+  switch_n=""
+  scp_args=""
 
   for (( i=1; i<=$#; i++ )); do
     local arg=${!i}
