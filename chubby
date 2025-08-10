@@ -68,6 +68,11 @@ function parse_arg() {
       elif [[ "$char" == "r" ]]; then
         switch_r="-r"
 
+      # handle update operator
+      elif [[ "$char" == "-" ]]; then
+        dest_waiting=$((i+1))
+        src=$potential_src
+
         # handle arguments
       elif [[ "$char" == "p" ]]; then
         port_waiting=$((i+1))
@@ -77,11 +82,6 @@ function parse_arg() {
       fi
 
     done
-
-    # handle update operator
-  elif [[ "$arg" == ">" ]]; then
-    dest_waiting=$((i+1))
-    src=$potential_src
 
     # handle argument values
   elif [ $port_waiting -eq $narg ]; then
