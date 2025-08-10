@@ -40,6 +40,7 @@ switch_n=""
 
 file=".chubby"
 file_waiting=-1
+file_contents=""
 command=""
 command_waiting=-1
 
@@ -119,7 +120,7 @@ function find_file() {
   if [ ! -e $ffile ]; then
     ffile=$(realpath "$dir/$file")
   fi
-  parse_args $(cat "$ffile")
+  file_contents=$(cat "$ffile")
 }
 
 ###############################################################################
@@ -131,6 +132,7 @@ function find_file() {
 parse_args $@
 if [[ "$switch_n" == "" ]]; then
   find_file
+  parse_args $file_contents
 fi
 
 echo "switch_D: $switch_D"
