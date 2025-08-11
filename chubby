@@ -116,6 +116,11 @@ function execute_line() {
 
   if [[ ! $scp_args == "" ]]; then
     scp $scp_args
+    if [ $? -eq 0 ]; then
+      echo "Success: $@"
+    else
+      echo "Error: $@"
+    fi
   fi
 }
 
