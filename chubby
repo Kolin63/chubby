@@ -25,7 +25,7 @@ function print_help() {
   echo "operation on a line."
   echo ""
   echo "Now that the .chubby file is made, you can run the command 'chubby' in"
-  echo "any directory and that file will be executed."
+  echo "any sub-directory and that file will be executed."
   echo ""
   echo "Since Chubby is an scp wrapper, any arguments not listed below will be"
   echo "passed to scp. Therefore, any and all scp arguments are valid for"
