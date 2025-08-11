@@ -35,7 +35,7 @@ function print_help() {
   echo "-n      Don't read from a file."
   echo ""
   echo "-f file"
-  echo "        The name of the file to read from. Defaults to '.chubby'. The"
+  echo "        The name of the file to read from. Defaults to \`.chubby.\` The"
   echo "        search for this file starts in the current working directory,"
   echo "        and continues to check in the parent directory until it"
   echo "        reaches ~ or /."

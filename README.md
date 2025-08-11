@@ -11,12 +11,12 @@ you don't want to commit all of your small tweaks onto Git.
 
 ## Using Chubby
 Start by making a file named .chubby in the root directory of your
-project. In the file, use the syntax of \`[args] src dest\`. An
-example line would be: \`-rOD src/ john@example.com:~/project/src/\`
+project. In the file, use the syntax of `[args] src dest`. An
+example line would be: `-rOD src/ john@example.com:~/project/src/`
 Note that Chubby Files are line based, so make sure to put one
 operation on a line.
 
-Now that the .chubby file is made, you can run the command 'chubby' in
+Now that the .chubby file is made, you can run the command `chubby` in
 any sub-directory and that file will be executed.
 
 Since Chubby is an scp wrapper, any arguments not listed below will be
