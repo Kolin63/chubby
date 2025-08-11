@@ -20,7 +20,7 @@ function print_help() {
   echo "USING CHUBBY"
   echo "Start by making a file named .chubby in the root directory of your"
   echo "project. In the file, use the syntax of \`[args] src dest\`. An"
-  echo "example line would be: \`-rOD src/ john@example.com:~/project/src/\`"
+  echo "example line would be: \`-rO src/ john@example.com:~/project/src/\`"
   echo "Note that Chubby Files are line based, so make sure to put one"
   echo "operation on a line."
   echo ""
