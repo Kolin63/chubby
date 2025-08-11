@@ -35,11 +35,3 @@ Since Chubby is an scp wrapper, any arguments not listed below will be
 passed to scp. Therefore, any and all scp arguments are valid for
 Chubby to use. For the same reason, Chubby can copy files on the same
 machine, over an SSH connection, or over an SCP connection (scp://)
-
--n      Don't read from a file.
-
--f file
-        The name of the file to read from. Defaults to '.chubby'. The
-        search for this file starts in the current working directory,
-        and continues to check in the parent directory until it
-        reaches ~ or /.
