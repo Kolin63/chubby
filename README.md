@@ -4,6 +4,9 @@ Work Locally, Edit Remotely!
 > Dedicated to James Chubbuck, who refuses to use Vim because it's annoying
 > to use it over ssh.
 
+Watch [this video](https://youtu.be/QOWwz68JaNU?si=iXZ76Cb4KYkja1Qe)
+for an explanation.
+
 Chubby is a wrapper around scp that aids in the process of editing
 files locally and sending them to a remote server. This can be useful
 if testing or deployment needs to be done on the remote server, but
