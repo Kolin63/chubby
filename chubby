@@ -143,7 +143,6 @@ function execute_file() {
 
   local wc=$(wc -l $file_path)
   local lines=${wc%% *}
-  echo "$file has $lines lines"
 
   for ((i=1; i<=$lines; i++)); do
     execute_line $(sed -n "$(echo $i)p" $file_path)
