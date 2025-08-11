@@ -1,35 +1,33 @@
 # Chubby
 Work Locally, Edit Remotely!
 
-> Dedicated to James Chubbuck, who refuses to use Vim because he doesn't want
+> Dedicated to James Chubbuck, who refuses to use Vim because it's annoying
 > to use it over ssh.
 
-## Usage
-chubby [-t timer] [-O legacy_scp] [-r recursive] [-B batch_mode] [-p port] 
-       [-D pre_delete] src dest
+Chubby is a wrapper around scp that aids in the process of editing
+files locally and sending them to a remote server. This can be useful
+if testing or deployment needs to be done on the remote server, but
+you don't want to commit all of your small tweaks onto Git.
 
-src and dest are the source file(s) and destination file or directory. Either
-can be via ssh (john@example.com:/path/to/file/or/directory) or locally
-(/path/to/file/or/directory). 
+## Using Chubby
+Start by making a file named .chubby in the root directory of your
+project. In the file, use the syntax of \`[args] src dest\`. An
+example line would be: \`-rOD src/ john@example.com:~/project/src/\`
+Note that Chubby Files are line based, so make sure to put one
+operation on a line.
 
--t: A positive integral value, representing how many seconds the program waits
-    before updating the destination again. Set to 0 to manually continue in
-    between each update. Defaults to 0.
+Now that the .chubby file is made, you can run the command 'chubby' in
+any sub-directory and that file will be executed.
 
--O: Use the legacy SCP protocol for file transfers instead of the SFTP 
-    protocol. Forcing the use of the SCP protocol may be necessary for servers 
-    that do not implement SFTP, for backwards-compatibility for particular 
-    filename wildcard patterns and for expanding paths with a ‘~’ prefix for 
-    older SFTP servers.
+Since Chubby is an scp wrapper, any arguments not listed below will be
+passed to scp. Therefore, any and all scp arguments are valid for
+Chubby to use. For the same reason, Chubby can copy files on the same
+machine, over an SSH connection, or over an SCP connection (scp://)
 
--r: Recursively copy entire directories.
+-n      Don't read from a file.
 
--B: Selects batch mode (prevents asking for passwords or passphrases).
-
--p: Specifies the port to connect to on the remote host if SSH is being used.
-    May be written with a lowercase or capital P.
-
--D: Enables Pre-Delete, which first deletes the file or directory at the
-    destination before copying the source. Note that if you are recursively
-    copying a directory, this can be potentially destructive and delete files
-    that were not intended to be deleted.
+-f file
+        The name of the file to read from. Defaults to '.chubby'. The
+        search for this file starts in the current working directory,
+        and continues to check in the parent directory until it
+        reaches ~ or /.
