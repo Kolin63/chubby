@@ -127,7 +127,7 @@ function execute_line() {
 function find_file() {
   local dir=$(pwd)
   while [ ! -e "$dir/$file" ] && [ ! -e $file ]; do
-    dir=$(realpath "$dir/../")
+    dir="$dir/../"
     if [[ "$dir" == "$HOME" ]] || [[ "$dir" == "/" ]]; then
       echo "Could not find file $file"
       print_help
@@ -135,19 +135,18 @@ function find_file() {
     fi
   done
 
-  local ffile=$(realpath $file)
-  if [ ! -e $ffile ]; then
-    ffile=$(realpath "$dir/$file")
+  if [ ! -e $file ]; then
+    file="$dir/$file"
   fi
-  file_path=$ffile
+  file_path=$file
   file_contents=$(cat "$file_path")
 }
 
 function execute_file() {
   find_file
 
-  local wc=$(wc -l $file_path)
-  local lines=${wc%% *}
+  local lines=$(wc -l < $file_path)
+  lines=$(($lines+0))
 
   for (( efi=1; efi<=$lines; efi++ )); do
     local line=$(sed -n "$(echo $efi)p" $file_path)
